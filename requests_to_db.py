@@ -1,9 +1,23 @@
 import sqlite3
 from telegram.ext import ConversationHandler
+from telegram import Bot
+from config import BOT_TOKEN
 
 con = sqlite3.connect("data/db/teams_db.sqlite")
 cur = con.cursor()
 
+
+games_id = {
+    1: 'brawl_stars',
+    2: 'valorant',
+    3: 'gta5',
+    4: 'dota2',
+    5: 'cs_go',
+    6: 'minecraft',
+    7: 'wow',
+    8: 'pubg',
+    9: 'fortnite'
+}
 
 def add_user_to_db(update):
     user_id = update.message.from_user.username
@@ -19,8 +33,31 @@ async def contact(update, context):
     message = update.message.text
     cur.execute("UPDATE users SET contact = (?) WHERE user_id = (?)", (message, user_id,))
     con.commit()
-    await update.message.reply_text("Ваша информация успешно добавлена!")
+    await update.message.reply_text("Ваша информация успешно добавлена! Чтобы найти напарника пишите /find")
     return ConversationHandler.END
+
+
+async def find(update, context):
+    user_id = update.message.from_user.username
+    user = cur.execute("SELECT * FROM users WHERE user_id=?", (user_id,)).fetchall()[0]
+    user_games = []
+    teammate_games = []
+    for i, val in enumerate(user[1:]):
+        if val == 1:
+            user_games.append(games_id[i])
+    while not set(user_games) & set(teammate_games):
+        teammate_games = []
+        teammate = cur.execute("SELECT * FROM users "
+                               "WHERE user_id not in (?) "
+                               "ORDER BY RANDOM() LIMIT 1", (user_id,)).fetchall()[0]
+        for i, val in enumerate(teammate[1:]):
+            if val == 1:
+                teammate_games.append(games_id[i])
+    intersection_games = ', '.join(list(set(user_games) & set(teammate_games)))
+    await update.message.reply_text(f"Напарник найден! Общие игры - "
+                                    f"{intersection_games}. ")
+    await update.message.reply_text(f"Информация: {teammate[1]}")
+    await update.message.reply_text(f"Его телеграм: @{teammate[0]}")
 
 
 async def brawl_stars(update, context):

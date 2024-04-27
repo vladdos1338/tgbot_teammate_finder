@@ -1,7 +1,7 @@
 from telegram import ReplyKeyboardMarkup
 from telegram.ext import *
 from requests_to_db import brawl_stars, fortnite, gta5, cs_go, valorant, dota2, pubg, wow, minecraft, add_user_to_db
-from requests_to_db import contact
+from requests_to_db import contact, find
 from config import BOT_TOKEN
 
 
@@ -47,10 +47,11 @@ def main():
         },
         fallbacks=[CommandHandler('stop', stop)]
     )
-
+    find_teammate = CommandHandler('find', find)
     # Регистрируем обработчики в приложении.
     application.add_handler(start_message)
     application.add_handler(contact_info)
+    application.add_handler(find_teammate)
     application.add_handler(CommandHandler('brawl_stars', brawl_stars))
     application.add_handler(CommandHandler('valorant', valorant))
     application.add_handler(CommandHandler('gta5', gta5))
