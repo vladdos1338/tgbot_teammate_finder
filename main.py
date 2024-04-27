@@ -10,7 +10,7 @@ async def start(update, context):
     user_id = update.message.from_user.username
     print(f"Пользователь {user_id} запустил бота.")
     # Если у пользователя нет никнейма, то бот просит его создать
-    if user_id == None:
+    if user_id is None:
         await update.message.reply_text("Чтобы найти союзника создайте себе username в настройках телеграмма!")
     else:
         add_user_to_db(update)
@@ -18,7 +18,8 @@ async def start(update, context):
                     ['/dota2', '/cs_go', '/minecraft'],
                     ['/wow', '/pubg', '/fortnite']]
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False)
-        await update.message.reply_text('Привет! Хочешь найти себе напарников для игры? Тогда выбери в какие игры ты играешь:', reply_markup=reply_markup)
+        await update.message.reply_text('Привет! Хочешь найти себе напарников для игры? '
+                                        'Тогда выбери в какие игры ты играешь:', reply_markup=reply_markup)
 
 
 async def contact_response(update, context):

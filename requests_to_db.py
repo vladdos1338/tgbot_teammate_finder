@@ -1,7 +1,5 @@
 import sqlite3
 from telegram.ext import ConversationHandler
-from telegram import Bot
-from config import BOT_TOKEN
 
 con = sqlite3.connect("data/db/teams_db.sqlite")
 cur = con.cursor()
@@ -19,12 +17,14 @@ games_id = {
     9: 'fortnite'
 }
 
+
 def add_user_to_db(update):
     user_id = update.message.from_user.username
+    chat_id = update.message.chat_id
     print(user_id)
     info = cur.execute("SELECT * FROM users WHERE user_id=?", (user_id,)).fetchone()
     if not info:
-        cur.execute("INSERT INTO users(user_id) VALUES(?)", (user_id,))
+        cur.execute("INSERT INTO users(user_id, chat_id) VALUES(?, ?)", (user_id, chat_id,))
     con.commit()
 
 
@@ -58,6 +58,10 @@ async def find(update, context):
                                     f"{intersection_games}. ")
     await update.message.reply_text(f"Информация: {teammate[1]}")
     await update.message.reply_text(f"Его телеграм: @{teammate[0]}")
+    # Отправляем сообщение, тому, кого нашли
+    await context.bot.send_message(text=f'Тебя нашел пользователь @{user[0]}', chat_id=teammate[11])
+    await context.bot.send_message(text=f'Его информация: {user[1]}', chat_id=teammate[11])
+    await context.bot.send_message(text=f'Ваши общие игры - {intersection_games}', chat_id=teammate[11])
 
 
 async def brawl_stars(update, context):
