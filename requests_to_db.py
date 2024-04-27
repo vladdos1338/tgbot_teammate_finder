@@ -1,4 +1,5 @@
 import sqlite3
+from telegram.ext import ConversationHandler
 
 con = sqlite3.connect("data/db/teams_db.sqlite")
 cur = con.cursor()
@@ -11,6 +12,15 @@ def add_user_to_db(update):
     if not info:
         cur.execute("INSERT INTO users(user_id) VALUES(?)", (user_id,))
     con.commit()
+
+
+async def contact(update, context):
+    user_id = update.message.from_user.username
+    message = update.message.text
+    cur.execute("UPDATE users SET contact = (?) WHERE user_id = (?)", (message, user_id,))
+    con.commit()
+    await update.message.reply_text("Ваша информация успешно добавлена!")
+    return ConversationHandler.END
 
 
 async def brawl_stars(update, context):
